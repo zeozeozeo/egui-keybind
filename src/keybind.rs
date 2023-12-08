@@ -1,13 +1,13 @@
 use crate::Bind;
 use egui::{
-    vec2, Event, Id, Key, KeyboardShortcut, ModifierNames, PointerButton, RichText, Sense,
+    pos2, vec2, Event, Id, Key, KeyboardShortcut, ModifierNames, PointerButton, RichText, Sense,
     TextStyle, Ui, Widget, WidgetInfo, WidgetText, WidgetType,
 };
 
 /// A keybind (hotkey) widget for [egui].
 pub struct Keybind<'a, B: Bind> {
     bind: &'a mut B,
-    prev_bind: B,
+    reset: B,
     text: &'a str,
     id: Id,
     reset_key: Option<Key>,
@@ -25,7 +25,7 @@ impl<'a, B: Bind> Keybind<'a, B> {
         let prev_bind = bind.clone();
         Self {
             bind,
-            prev_bind,
+            reset: prev_bind,
             text: "",
             id: id.into(),
             reset_key: None,
@@ -38,7 +38,7 @@ impl<'a, B: Bind> Keybind<'a, B> {
     ///
     /// You can remove the text by setting it to an empty string.
     /// By default there is no text.
-    pub fn with_text(&mut self, text: &'a str) -> &mut Self {
+    pub fn with_text(mut self, text: &'a str) -> Self {
         self.text = text;
         self
     }
@@ -46,7 +46,7 @@ impl<'a, B: Bind> Keybind<'a, B> {
     /// Set the bind of the [Keybind].
     ///
     /// By default this is the bind that was passed to `new`.
-    pub fn with_bind(&mut self, bind: &'a mut B) -> &mut Self {
+    pub fn with_bind(mut self, bind: &'a mut B) -> Self {
         self.bind = bind;
         self
     }
@@ -54,7 +54,7 @@ impl<'a, B: Bind> Keybind<'a, B> {
     /// Set the ID of the [Keybind] in [egui]'s memory.
     ///
     /// By default this is the ID that was passed in `new`.
-    pub fn with_id(&mut self, id: impl Into<Id>) -> &mut Self {
+    pub fn with_id(mut self, id: impl Into<Id>) -> Self {
         self.id = id.into();
         self
     }
@@ -63,7 +63,7 @@ impl<'a, B: Bind> Keybind<'a, B> {
     /// never reset to its' previous value.
     ///
     /// By default this is [None].
-    pub fn with_reset_key(&mut self, key: Option<Key>) -> &mut Self {
+    pub fn with_reset_key(mut self, key: Option<Key>) -> Self {
         self.reset_key = key;
         self
     }
@@ -71,18 +71,19 @@ impl<'a, B: Bind> Keybind<'a, B> {
     /// Set the bind that the [Keybind] will reset to after the reset key gets pressed.
     ///
     /// By default this is the same as the bind passed to `new`.
-    pub fn with_prev_bind(&mut self, prev_bind: B) -> &mut Self {
-        self.prev_bind = prev_bind;
+    pub fn with_reset(mut self, prev_bind: B) -> Self {
+        self.reset = prev_bind;
         self
     }
 
     /// Set the modifier names to use for the [Keybind]. By default this is [`ModifierNames::NAMES`].
-    pub fn with_modifier_names(&mut self, modifier_names: &'a ModifierNames<'a>) -> &mut Self {
+    pub fn with_modifier_names(mut self, modifier_names: &'a ModifierNames<'a>) -> Self {
         self.modifier_names = modifier_names;
         self
     }
 }
 
+/// Get the widget expecting value from egui's memory.
 fn get_expecting(ui: &Ui, id: Id) -> bool {
     let expecting = ui.ctx().memory_mut(|memory| {
         *memory
@@ -92,6 +93,7 @@ fn get_expecting(ui: &Ui, id: Id) -> bool {
     expecting
 }
 
+/// Set the widget expecting value in egui's memory.
 fn set_expecting(ui: &Ui, id: Id, expecting: bool) {
     ui.ctx().memory_mut(|memory| {
         *memory
@@ -133,13 +135,6 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
             if response.clicked_elsewhere() {
                 // the user has clicked somewhere else, stop capturing input
                 expecting = false;
-            } else if let Some(reset_key) = self.reset_key {
-                // the reset key was pressed
-                if ui.input(|i| i.key_pressed(reset_key)) {
-                    *self.bind = self.prev_bind;
-                    expecting = false;
-                    response.mark_changed();
-                }
             } else {
                 // everything ok, capture keyboard input
                 let kb = ui.input(|i| {
@@ -178,6 +173,15 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
                     expecting = false;
                 }
             }
+
+            if let Some(reset_key) = self.reset_key {
+                // the reset key was pressed
+                if ui.input(|i| i.key_pressed(reset_key)) {
+                    *self.bind = self.reset;
+                    expecting = false;
+                    response.mark_changed();
+                }
+            }
         }
 
         // paint
@@ -197,13 +201,28 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
                 .align_size_within_rect(galley.size(), rect.shrink2(button_padding))
                 .min;
 
-            // align button to center if it doesn't expand the rect
+            // align text to center of the button if it doesn't expand the rect
             if text_pos.x + galley.size().x + button_padding.x < rect.right() {
                 text_pos.x += rect.size().x / 2.0 - galley.size().x / 2.0 - button_padding.x;
             }
 
-            // paint text
+            // paint text inside button
             galley.paint_with_visuals(ui.painter(), text_pos, &visuals);
+
+            // compute galley for text outside on the left, if any
+            if !self.text.is_empty() {
+                let galley = WidgetText::RichText(RichText::new(self.text)).into_galley(
+                    ui,
+                    Some(true),
+                    ui.available_width() - rect.right(),
+                    TextStyle::Button,
+                );
+                let text_pos = pos2(
+                    rect.right() + ui.spacing().icon_spacing,
+                    rect.center().y - 0.5 * galley.size().y,
+                );
+                galley.paint_with_visuals(ui.painter(), text_pos, ui.style().noninteractive());
+            }
         }
 
         if prev_expecting != expecting {

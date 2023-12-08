@@ -1,4 +1,4 @@
-use egui::{Key, KeyboardShortcut, ModifierNames, PointerButton};
+use egui::{InputState, Key, KeyboardShortcut, ModifierNames, PointerButton};
 
 /// A trait can can be used for keybindings.
 ///
@@ -23,6 +23,15 @@ pub trait Bind: Clone {
     /// # Returns
     /// The formatted keybind as a [String].
     fn format(&self, names: &ModifierNames<'_>, is_mac: bool) -> String;
+
+    /// Check if the keybind is pressed.
+    ///
+    /// # Arguments
+    /// * `input` - The [InputState] to check with.
+    ///
+    /// # Returns
+    /// Whether the keybind is pressed.
+    fn pressed(&self, input: &mut InputState) -> bool;
 }
 
 /// A [Bind] implementation for [egui]'s [KeyboardShortcut].
@@ -35,6 +44,10 @@ impl Bind for KeyboardShortcut {
 
     fn format(&self, names: &ModifierNames<'_>, is_mac: bool) -> String {
         self.format(names, is_mac)
+    }
+
+    fn pressed(&self, input: &mut InputState) -> bool {
+        input.consume_shortcut(self)
     }
 }
 
@@ -49,6 +62,14 @@ impl Bind for Option<KeyboardShortcut> {
             |shortcut| shortcut.format(names, is_mac),
         )
     }
+
+    fn pressed(&self, input: &mut InputState) -> bool {
+        if let Some(shortcut) = self {
+            input.consume_shortcut(shortcut)
+        } else {
+            false
+        }
+    }
 }
 
 /// A [Bind] implementation for [egui]'s [Key]. Ignores modifiers.
@@ -61,6 +82,10 @@ impl Bind for Key {
 
     fn format(&self, _names: &ModifierNames<'_>, _is_mac: bool) -> String {
         self.name().to_string()
+    }
+
+    fn pressed(&self, input: &mut InputState) -> bool {
+        input.key_pressed(*self)
     }
 }
 
@@ -75,6 +100,14 @@ impl Bind for Option<Key> {
         self.as_ref()
             .map_or_else(|| "None".to_string(), |key| key.name().to_string())
     }
+
+    fn pressed(&self, input: &mut InputState) -> bool {
+        if let Some(key) = self {
+            input.key_pressed(*key)
+        } else {
+            false
+        }
+    }
 }
 
 /// A [Bind] implementation for [egui]'s [PointerButton]. Ignores keys and modifiers.
@@ -88,6 +121,10 @@ impl Bind for PointerButton {
     fn format(&self, _names: &ModifierNames<'_>, _is_mac: bool) -> String {
         format!("{:?}", self)
     }
+
+    fn pressed(&self, input: &mut InputState) -> bool {
+        input.pointer.button_pressed(*self)
+    }
 }
 
 impl Bind for Option<PointerButton> {
@@ -98,6 +135,14 @@ impl Bind for Option<PointerButton> {
     fn format(&self, _names: &ModifierNames<'_>, _is_mac: bool) -> String {
         self.as_ref()
             .map_or_else(|| "None".to_string(), |button| format!("{:?}", button))
+    }
+
+    fn pressed(&self, input: &mut InputState) -> bool {
+        if let Some(button) = self {
+            input.pointer.button_pressed(*button)
+        } else {
+            false
+        }
     }
 }
 
@@ -127,22 +172,6 @@ impl Shortcut {
     pub fn new(keyboard: Option<KeyboardShortcut>, pointer: Option<PointerButton>) -> Self {
         Self { keyboard, pointer }
     }
-
-    /// Check if the keybind is pressed. If it is, [egui] will consume the pressed keys so it
-    /// doesn't trigger the next frame.
-    pub fn consume(&self, input: &mut egui::InputState) -> bool {
-        let mut pressed = false;
-        if let Some(kb) = &self.keyboard {
-            pressed = input.consume_shortcut(kb);
-        }
-        if let Some(button) = self.pointer {
-            if self.keyboard.is_none() {
-                return input.pointer.button_clicked(button);
-            }
-            pressed &= input.pointer.button_clicked(button);
-        }
-        pressed
-    }
 }
 
 impl Bind for Shortcut {
@@ -165,6 +194,20 @@ impl Bind for Shortcut {
             string.push_str("None");
         }
         string
+    }
+
+    fn pressed(&self, input: &mut InputState) -> bool {
+        let mut pressed = false;
+        if let Some(kb) = &self.keyboard {
+            pressed = input.consume_shortcut(kb);
+        }
+        if let Some(button) = self.pointer {
+            if self.keyboard.is_none() {
+                return input.pointer.button_clicked(button);
+            }
+            pressed &= input.pointer.button_clicked(button);
+        }
+        pressed
     }
 }
 
