@@ -4,7 +4,7 @@
 //!
 //! # Serde
 //!
-//! For serde support, enable the `serde-support` feature.
+//! For serde support, enable the `serde` feature.
 //!
 //! # License
 //!

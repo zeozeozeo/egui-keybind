@@ -1,3 +1,7 @@
+# 0.2.3
+
+* Replace `serde-support` feature with `serde`
+
 # 0.2.2
 
 * Fix serde support
