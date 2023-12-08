@@ -1,3 +1,7 @@
+# 0.2.1
+
+* Make `serde` an optional dependency
+
 # 0.2.0
 
 * Fix `with_` methods on `Keybind`
