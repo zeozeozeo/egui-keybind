@@ -1,12 +1,12 @@
 [package]
 name = "egui-keybind"
 description = "A keybind widget for egui"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 license = "Unlicense OR MIT OR BSL-1.0"
 authors = ["zeozeozeo"]
-homepage = "https://github.com/egui-keybind"
-repository = "https://github.com/egui-keybind"
+homepage = "https://github.com/zeozeozeo/egui-keybind"
+repository = "https://github.com/zeozeozeo/egui-keybind"
 readme = "README.md"
 documentation = "https://docs.rs/egui-keybind"
 keywords = ["egui", "keybind", "hotkey", "widget", "ui"]
@@ -20,3 +20,6 @@ serde = { version = "1.0.193", features = ["derive"], optional = true }
 
 [dev-dependencies]
 eframe  = "0.24.1" # used in example
+
+[features]
+serde-support = ["serde", "egui/serde"]

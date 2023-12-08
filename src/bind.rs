@@ -1,4 +1,4 @@
-use egui::{InputState, Key, KeyboardShortcut, ModifierNames, PointerButton};
+use egui::{InputState, Key, KeyboardShortcut, ModifierNames, Modifiers, PointerButton};
 
 /// A trait can can be used for keybindings.
 ///
@@ -146,14 +146,39 @@ impl Bind for Option<PointerButton> {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+struct KeyboardShortcutWrapper {
+    pub modifiers: Modifiers,
+    pub key: Key,
+}
+
+impl From<KeyboardShortcutWrapper> for KeyboardShortcut {
+    fn from(value: KeyboardShortcutWrapper) -> Self {
+        Self {
+            modifiers: value.modifiers,
+            key: value.key,
+        }
+    }
+}
+
+impl From<KeyboardShortcut> for KeyboardShortcutWrapper {
+    fn from(value: KeyboardShortcut) -> Self {
+        Self {
+            modifiers: value.modifiers,
+            key: value.key,
+        }
+    }
+}
+
 /// A keybind that can be set with either the keyboard or a mouse.
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Shortcut {
     /// Keyboard shortcut, if any. This can be set along with the mouse shortcut.
-    pub keyboard: Option<KeyboardShortcut>,
+    keyboard: Option<KeyboardShortcutWrapper>,
     /// Mouse button, if any. This can be set along with the keyboard shortcut.
-    pub pointer: Option<PointerButton>,
+    pointer: Option<PointerButton>,
 }
 
 impl Shortcut {
@@ -170,20 +195,36 @@ impl Shortcut {
     /// * `keyboard` - The keyboard shortcut to set ([KeyboardShortcut]), or [None].
     /// * `pointer` - The pointer button to set ([PointerButton]), or [None].
     pub fn new(keyboard: Option<KeyboardShortcut>, pointer: Option<PointerButton>) -> Self {
-        Self { keyboard, pointer }
+        Self {
+            keyboard: keyboard.map(|kb| kb.into()),
+            pointer,
+        }
+    }
+
+    /// Keyboard shortcut, if any. This can be set along with the mouse shortcut.
+    #[inline]
+    pub fn keyboard(&self) -> Option<KeyboardShortcut> {
+        self.keyboard.map(|kb| kb.into())
+    }
+
+    /// Mouse button, if any. This can be set along with the keyboard shortcut.
+    #[inline]
+    pub const fn pointer(&self) -> Option<PointerButton> {
+        self.pointer
     }
 }
 
 impl Bind for Shortcut {
     fn set(&mut self, keyboard: Option<KeyboardShortcut>, pointer: Option<PointerButton>) {
-        self.keyboard = keyboard;
+        self.keyboard = keyboard.map(|kb| kb.into());
         self.pointer = pointer;
     }
 
     fn format(&self, names: &ModifierNames<'_>, is_mac: bool) -> String {
-        let mut string = self
-            .keyboard
-            .map_or_else(|| String::with_capacity(9), |kb| kb.format(names, is_mac));
+        let mut string = self.keyboard.map_or_else(
+            || String::with_capacity(9),
+            |kb| Into::<KeyboardShortcut>::into(kb).format(names, is_mac),
+        );
         if let Some(pointer) = self.pointer {
             if !string.is_empty() {
                 string.push('+');
@@ -199,7 +240,7 @@ impl Bind for Shortcut {
     fn pressed(&self, input: &mut InputState) -> bool {
         let mut pressed = false;
         if let Some(kb) = &self.keyboard {
-            pressed = input.consume_shortcut(kb);
+            pressed = input.consume_shortcut(&(*kb).into());
         }
         if let Some(button) = self.pointer {
             if self.keyboard.is_none() {
@@ -213,7 +254,7 @@ impl Bind for Shortcut {
 
 impl From<Shortcut> for Option<KeyboardShortcut> {
     fn from(value: Shortcut) -> Self {
-        value.keyboard
+        value.keyboard.map(|kb| kb.into())
     }
 }
 

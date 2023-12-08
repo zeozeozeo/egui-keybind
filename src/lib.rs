@@ -2,6 +2,10 @@
 //!
 //! This library provides a simple [egui](https://github.com/emilk/egui) widget for keybindings (hotkeys).
 //!
+//! # Serde
+//!
+//! For serde support, enable the `serde-support` feature.
+//!
 //! # License
 //!
 //! Public domain or MIT or Boost Software License
