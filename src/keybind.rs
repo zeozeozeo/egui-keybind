@@ -138,6 +138,7 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
                 if ui.input(|i| i.key_pressed(reset_key)) {
                     *self.bind = self.prev_bind;
                     expecting = false;
+                    response.mark_changed();
                 }
             } else {
                 // everything ok, capture keyboard input
