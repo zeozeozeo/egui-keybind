@@ -142,18 +142,26 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
         let mut hotkey_rect = rect;
         *hotkey_rect.right_mut() -= custom_text_width;
 
-        // add widget info for accessibility. this generates a string like "Ctrl+T. Open the terminal"
-        // if the keybind was created with `with_text`
-        response.widget_info(|| {
-            WidgetInfo::selected(WidgetType::Button, false, text.clone() + ". " + self.text)
-        });
-
         // see if we're currently waiting for any key (pull from egui's memory)
         let mut expecting = get_expecting(ui, self.id);
         let prev_expecting = expecting;
         if response.clicked() {
             expecting = !expecting;
         }
+
+        // add widget info for accessibility. this generates a string like "Ctrl+T. Open the terminal"
+        // if the keybind was created with `with_text`
+        response.widget_info(|| {
+            WidgetInfo::selected(
+                WidgetType::Button,
+                expecting,
+                if self.text.is_empty() {
+                    text.clone() // just read out the hotkey
+                } else {
+                    text.clone() + ". " + self.text
+                },
+            )
+        });
 
         if expecting {
             if response.clicked_elsewhere() {
