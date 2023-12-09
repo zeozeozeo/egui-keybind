@@ -1,3 +1,7 @@
+# 0.2.4
+
+* Fix keybind text overflowing the allocated widget space / reporting incorrect size
+
 # 0.2.3
 
 * Replace `serde-support` feature with `serde`

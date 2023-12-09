@@ -115,8 +115,32 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
 
         let size = ui.spacing().interact_size.max(galley.size());
         let button_padding = ui.spacing().button_padding;
-        let (rect, mut response) =
-            ui.allocate_exact_size(size + button_padding * vec2(2.0, 1.0), Sense::click());
+        let mut widget_size = size + button_padding * vec2(2.0, 1.0);
+
+        // compute the text galley next to the widget (set by with_text), expand
+        // widget appropriately
+        let text_galley = if !self.text.is_empty() {
+            let galley = WidgetText::RichText(RichText::new(self.text)).into_galley(
+                ui,
+                Some(true),
+                ui.available_width() - widget_size.x, // not exactly right
+                TextStyle::Button,
+            );
+            Some(galley)
+        } else {
+            None
+        };
+
+        let custom_text_width = text_galley.clone().map_or(0.0, |text_galley| {
+            ui.spacing().icon_spacing + text_galley.size().x
+        });
+        widget_size.x += custom_text_width;
+
+        let (rect, mut response) = ui.allocate_exact_size(widget_size, Sense::click());
+
+        // calculate size of the widget without the custom text
+        let mut hotkey_rect = rect;
+        *hotkey_rect.right_mut() -= custom_text_width;
 
         // add widget info for accessibility. this generates a string like "Ctrl+T. Open the terminal"
         // if the keybind was created with `with_text`
@@ -189,7 +213,7 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
             // paint bg rect
             let visuals = ui.style().interact_selectable(&response, expecting);
             ui.painter().rect(
-                rect.expand(visuals.expansion),
+                hotkey_rect.expand(visuals.expansion),
                 visuals.rounding,
                 visuals.bg_fill,
                 visuals.bg_stroke,
@@ -198,30 +222,24 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
             // align text to center in rect that is shrinked to match button padding
             let mut text_pos = ui
                 .layout()
-                .align_size_within_rect(galley.size(), rect.shrink2(button_padding))
+                .align_size_within_rect(galley.size(), hotkey_rect.shrink2(button_padding))
                 .min;
 
             // align text to center of the button if it doesn't expand the rect
-            if text_pos.x + galley.size().x + button_padding.x < rect.right() {
-                text_pos.x += rect.size().x / 2.0 - galley.size().x / 2.0 - button_padding.x;
+            if text_pos.x + galley.size().x + button_padding.x < hotkey_rect.right() {
+                text_pos.x += hotkey_rect.size().x / 2.0 - galley.size().x / 2.0 - button_padding.x;
             }
 
             // paint text inside button
             galley.paint_with_visuals(ui.painter(), text_pos, &visuals);
 
-            // compute galley for text outside on the left, if any
-            if !self.text.is_empty() {
-                let galley = WidgetText::RichText(RichText::new(self.text)).into_galley(
-                    ui,
-                    Some(true),
-                    ui.available_width() - rect.right(),
-                    TextStyle::Button,
-                );
+            // paint galley for text outside on the left, if any
+            if let Some(text_galley) = text_galley {
                 let text_pos = pos2(
-                    rect.right() + ui.spacing().icon_spacing,
-                    rect.center().y - 0.5 * galley.size().y,
+                    hotkey_rect.right() + ui.spacing().icon_spacing,
+                    hotkey_rect.center().y - 0.5 * text_galley.size().y,
                 );
-                galley.paint_with_visuals(ui.painter(), text_pos, ui.style().noninteractive());
+                text_galley.paint_with_visuals(ui.painter(), text_pos, ui.style().noninteractive());
             }
         }
 
