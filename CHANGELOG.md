@@ -1,6 +1,7 @@
 # 0.2.5
 
 * Update to egui 0.25.0
+* Update serde to 1.0.195
 
 # 0.2.4
 
