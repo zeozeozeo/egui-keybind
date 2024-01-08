@@ -19,7 +19,7 @@ egui = "0.24.1"
 serde = { version = "1.0.193", features = ["derive"], optional = true }
 
 [dev-dependencies]
-eframe  = "0.24.1" # used in example
+eframe  = "0.25.0" # used in example
 
 [features]
 serde = ["dep:serde", "egui/serde"]
