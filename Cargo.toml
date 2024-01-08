@@ -16,7 +16,7 @@ categories = ["gui"]
 
 [dependencies]
 egui = "0.25.0"
-serde = { version = "1.0.193", features = ["derive"], optional = true }
+serde = { version = "1.0.195", features = ["derive"], optional = true }
 
 [dev-dependencies]
 eframe  = "0.25.0" # used in example
