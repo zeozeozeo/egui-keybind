@@ -176,6 +176,7 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
                             pressed: true,
                             modifiers,
                             repeat: false,
+                            ..
                         } => Some((*key, *modifiers)),
                         _ => None,
                     })
@@ -239,7 +240,7 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
             }
 
             // paint text inside button
-            galley.paint_with_visuals(ui.painter(), text_pos, &visuals);
+            ui.painter().galley(text_pos, galley, visuals.text_color());
 
             // paint galley for text outside on the left, if any
             if let Some(text_galley) = text_galley {
@@ -247,7 +248,11 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
                     hotkey_rect.right() + ui.spacing().icon_spacing,
                     hotkey_rect.center().y - 0.5 * text_galley.size().y,
                 );
-                text_galley.paint_with_visuals(ui.painter(), text_pos, ui.style().noninteractive());
+                ui.painter().galley(
+                    text_pos,
+                    text_galley,
+                    ui.style().noninteractive().text_color(),
+                );
             }
         }
 

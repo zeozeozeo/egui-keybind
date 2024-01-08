@@ -1,3 +1,7 @@
+# 0.2.5
+
+* Update to egui 0.25.0
+
 # 0.2.4
 
 * Fix keybind text overflowing the allocated widget space / reporting incorrect size

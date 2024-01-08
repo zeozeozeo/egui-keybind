@@ -81,7 +81,7 @@ impl ExampleApp {
                 .with_reset(Shortcut::new(
                     Some(egui::KeyboardShortcut {
                         modifiers: egui::Modifiers::NONE,
-                        key: egui::Key::X,
+                        logical_key: egui::Key::X,
                     }),
                     None,
                 ))

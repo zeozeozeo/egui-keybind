@@ -76,7 +76,7 @@ impl Bind for Option<KeyboardShortcut> {
 impl Bind for Key {
     fn set(&mut self, keyboard: Option<KeyboardShortcut>, _pointer: Option<PointerButton>) {
         if let Some(keyboard) = keyboard {
-            *self = keyboard.key
+            *self = keyboard.logical_key
         }
     }
 
@@ -92,7 +92,7 @@ impl Bind for Key {
 impl Bind for Option<Key> {
     fn set(&mut self, keyboard: Option<KeyboardShortcut>, _pointer: Option<PointerButton>) {
         if let Some(keyboard) = keyboard {
-            *self = Some(keyboard.key)
+            *self = Some(keyboard.logical_key)
         }
     }
 
@@ -157,7 +157,7 @@ impl From<KeyboardShortcutWrapper> for KeyboardShortcut {
     fn from(value: KeyboardShortcutWrapper) -> Self {
         Self {
             modifiers: value.modifiers,
-            key: value.key,
+            logical_key: value.key,
         }
     }
 }
@@ -166,7 +166,7 @@ impl From<KeyboardShortcut> for KeyboardShortcutWrapper {
     fn from(value: KeyboardShortcut) -> Self {
         Self {
             modifiers: value.modifiers,
-            key: value.key,
+            key: value.logical_key,
         }
     }
 }
