@@ -1,3 +1,7 @@
+# 0.2.6
+
+* Update to egui 0.26.0
+
 # 0.2.5
 
 * Update to egui 0.25.0
