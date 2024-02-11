@@ -1,4 +1,4 @@
-use egui::{InputState, Key, KeyboardShortcut, ModifierNames, Modifiers, PointerButton};
+use egui::{InputState, Key, KeyboardShortcut, ModifierNames, PointerButton};
 
 /// A trait can can be used for keybindings.
 ///
@@ -146,37 +146,12 @@ impl Bind for Option<PointerButton> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-struct KeyboardShortcutWrapper {
-    pub modifiers: Modifiers,
-    pub key: Key,
-}
-
-impl From<KeyboardShortcutWrapper> for KeyboardShortcut {
-    fn from(value: KeyboardShortcutWrapper) -> Self {
-        Self {
-            modifiers: value.modifiers,
-            logical_key: value.key,
-        }
-    }
-}
-
-impl From<KeyboardShortcut> for KeyboardShortcutWrapper {
-    fn from(value: KeyboardShortcut) -> Self {
-        Self {
-            modifiers: value.modifiers,
-            key: value.logical_key,
-        }
-    }
-}
-
 /// A keybind that can be set with either the keyboard or a mouse.
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Shortcut {
     /// Keyboard shortcut, if any. This can be set along with the mouse shortcut.
-    keyboard: Option<KeyboardShortcutWrapper>,
+    keyboard: Option<KeyboardShortcut>,
     /// Mouse button, if any. This can be set along with the keyboard shortcut.
     pointer: Option<PointerButton>,
 }
