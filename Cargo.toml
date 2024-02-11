@@ -15,11 +15,8 @@ categories = ["gui"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egui = "0.26.1"
-serde = { version = "1.0.195", features = ["derive"], optional = true }
-
-[dev-dependencies]
-eframe  = "0.26.1" # used in example
+egui = { git = "https://github.com/zeozeozeo/egui.git", branch = "tesselate-return-option" }
+serde = { version = "1.0.196", features = ["derive"], optional = true }
 
 [features]
 serde = ["dep:serde", "egui/serde"]
