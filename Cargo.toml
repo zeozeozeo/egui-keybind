@@ -1,7 +1,7 @@
 [package]
 name = "egui-keybind"
 description = "A keybind widget for egui"
-version = "0.2.8"
+version = "0.2.9"
 edition = "2021"
 license = "Unlicense OR MIT OR BSL-1.0"
 authors = ["zeozeozeo"]
@@ -16,7 +16,7 @@ categories = ["gui"]
 
 [dependencies]
 egui = "0.26.2"
-serde = { version = "1.0.195", features = ["derive"], optional = true }
+serde = { version = "1.0.196", features = ["derive"], optional = true }
 
 [dev-dependencies]
 eframe  = "0.26.2" # used in example
