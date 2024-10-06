@@ -108,7 +108,7 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
 
         let galley = WidgetText::RichText(RichText::new(text.clone())).into_galley(
             ui,
-            Some(false),
+            Some(egui::TextWrapMode::Extend),
             0.0,
             TextStyle::Button,
         );
@@ -122,7 +122,7 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
         let text_galley = if !self.text.is_empty() {
             let galley = WidgetText::RichText(RichText::new(self.text)).into_galley(
                 ui,
-                Some(true),
+                None,
                 ui.available_width() - widget_size.x, // not exactly right
                 TextStyle::Button,
             );
@@ -154,6 +154,7 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
         response.widget_info(|| {
             WidgetInfo::selected(
                 WidgetType::Button,
+                expecting,
                 expecting,
                 if self.text.is_empty() {
                     text.clone() // just read out the hotkey

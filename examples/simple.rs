@@ -8,7 +8,7 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "egui-keybind example",
         options,
-        Box::new(|_cc| Box::<ExampleApp>::default()),
+        Box::new(|_cc| Ok(Box::<ExampleApp>::default())),
     )
 }
 
