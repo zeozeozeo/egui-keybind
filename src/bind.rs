@@ -171,7 +171,7 @@ impl Shortcut {
     /// * `pointer` - The pointer button to set ([PointerButton]), or [None].
     pub fn new(keyboard: Option<KeyboardShortcut>, pointer: Option<PointerButton>) -> Self {
         Self {
-            keyboard: keyboard.map(|kb| kb.into()),
+            keyboard,
             pointer,
         }
     }
@@ -179,7 +179,7 @@ impl Shortcut {
     /// Keyboard shortcut, if any. This can be set along with the mouse shortcut.
     #[inline]
     pub fn keyboard(&self) -> Option<KeyboardShortcut> {
-        self.keyboard.map(|kb| kb.into())
+        self.keyboard
     }
 
     /// Mouse button, if any. This can be set along with the keyboard shortcut.
@@ -191,7 +191,7 @@ impl Shortcut {
 
 impl Bind for Shortcut {
     fn set(&mut self, keyboard: Option<KeyboardShortcut>, pointer: Option<PointerButton>) {
-        self.keyboard = keyboard.map(|kb| kb.into());
+        self.keyboard = keyboard;
         self.pointer = pointer;
     }
 
@@ -215,7 +215,7 @@ impl Bind for Shortcut {
     fn pressed(&self, input: &mut InputState) -> bool {
         let mut pressed = false;
         if let Some(kb) = &self.keyboard {
-            pressed = input.consume_shortcut(&(*kb).into());
+            pressed = input.consume_shortcut(kb);
         }
         if let Some(button) = self.pointer {
             if self.keyboard.is_none() {
@@ -229,7 +229,7 @@ impl Bind for Shortcut {
 
 impl From<Shortcut> for Option<KeyboardShortcut> {
     fn from(value: Shortcut) -> Self {
-        value.keyboard.map(|kb| kb.into())
+        value.keyboard
     }
 }
 
