@@ -170,10 +170,7 @@ impl Shortcut {
     /// * `keyboard` - The keyboard shortcut to set ([KeyboardShortcut]), or [None].
     /// * `pointer` - The pointer button to set ([PointerButton]), or [None].
     pub fn new(keyboard: Option<KeyboardShortcut>, pointer: Option<PointerButton>) -> Self {
-        Self {
-            keyboard,
-            pointer,
-        }
+        Self { keyboard, pointer }
     }
 
     /// Keyboard shortcut, if any. This can be set along with the mouse shortcut.
