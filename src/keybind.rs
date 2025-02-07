@@ -1,4 +1,5 @@
 use crate::Bind;
+use egui::epaint::StrokeKind;
 use egui::{
     pos2, vec2, Event, Id, Key, KeyboardShortcut, ModifierNames, PointerButton, RichText, Sense,
     TextStyle, Ui, Widget, WidgetInfo, WidgetText, WidgetType,
@@ -224,9 +225,10 @@ impl<'a, B: Bind> Widget for Keybind<'a, B> {
             let visuals = ui.style().interact_selectable(&response, expecting);
             ui.painter().rect(
                 hotkey_rect.expand(visuals.expansion),
-                visuals.rounding,
+                visuals.corner_radius,
                 visuals.bg_fill,
                 visuals.bg_stroke,
+                StrokeKind::Inside,
             );
 
             // align text to center in rect that is shrinked to match button padding
