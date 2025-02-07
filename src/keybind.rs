@@ -103,7 +103,7 @@ fn set_expecting(ui: &Ui, id: Id, expecting: bool) {
     });
 }
 
-impl<'a, B: Bind> Widget for Keybind<'a, B> {
+impl<B: Bind> Widget for Keybind<'_, B> {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
         let text = self.bind.format(self.modifier_names, false);
 
