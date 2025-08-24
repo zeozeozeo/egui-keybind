@@ -107,7 +107,7 @@ impl<B: Bind> Widget for Keybind<'_, B> {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
         let text = self.bind.format(self.modifier_names, false);
 
-        let galley = WidgetText::RichText(RichText::new(text.clone())).into_galley(
+        let galley = WidgetText::RichText(RichText::new(text.clone()).into()).into_galley(
             ui,
             Some(egui::TextWrapMode::Extend),
             0.0,
@@ -121,7 +121,7 @@ impl<B: Bind> Widget for Keybind<'_, B> {
         // compute the text galley next to the widget (set by with_text), expand
         // widget appropriately
         let text_galley = if !self.text.is_empty() {
-            let galley = WidgetText::RichText(RichText::new(self.text)).into_galley(
+            let galley = WidgetText::RichText(RichText::new(self.text).into()).into_galley(
                 ui,
                 None,
                 ui.available_width() - widget_size.x, // not exactly right
