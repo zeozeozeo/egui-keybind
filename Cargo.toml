@@ -16,11 +16,11 @@ exclude = ["media/**"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egui = "0.32.0"
+egui = "0.32"
 serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
-eframe = "0.32.0" # used in example
+eframe = "0.32" # used in example
 
 [features]
 serde = ["dep:serde", "egui/serde"]
